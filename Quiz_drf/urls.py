@@ -22,8 +22,8 @@ from django.contrib import admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    path('studentregister/',views.StudentRegister.as_view()),
+    path('teacher/',views.TeacherRegister.as_view()),
+    path('',views.StudentRegister.as_view()),
     path("login/",views.Login.as_view()),
 
 ]

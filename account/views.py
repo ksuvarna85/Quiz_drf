@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import permissions
 
-from account.serielizers import StudentSerializer,LoginSerializer
+from account.serielizers import StudentSerializer,LoginSerializer,TeacherSerializer
 from account.models import *
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -21,11 +21,42 @@ class StudentRegister(generics.GenericAPIView):
     def post(self,request,*args,**kwargs):
         serializer=StudentSerializer(data=request.data)
         #print(serializer)
+
         if serializer.is_valid(raise_exception=True):
             #print(serializer['password'])
 
             user=serializer.newsave()
-            return Response("done")
+            data={
+            "id":user.id,
+            "Name": user.first_name + " " + user.last_name,
+            "email":user.email,
+            "username":user.username,
+            "Resgistration Status":"done"
+
+            }
+            return Response(data)
+        else:
+            return Response('not done')
+class TeacherRegister(generics.GenericAPIView):
+    serializer_class=TeacherSerializer
+
+    def post(self,request,*args,**kwargs):
+        serializer=TeacherSerializer(data=request.data)
+        #print(serializer)
+
+        if serializer.is_valid(raise_exception=True):
+            #print(serializer['password'])
+
+            user=serializer.newsave()
+            data={
+            "id":user.id,
+            "Name": user.first_name + " " + user.last_name,
+            "email":user.email,
+            "username":user.username,
+            "Resgistration Status":"done"
+
+            }
+            return Response(data)
         else:
             return Response('not done')
 
@@ -35,8 +66,7 @@ class Login(generics.GenericAPIView):
     serializer_class=LoginSerializer
 
     def post(self,request,*args,**kwargs):
-        #serializer=self.get_serializer(data=request.data)
-        #user=authenticate(request,email=serializer.email,password=serializer.password)
+
         email = request.data.get("email")
         password = request.data.get("password")
         print(email,password)
@@ -56,8 +86,8 @@ class Login(generics.GenericAPIView):
             }
 
 
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(data)
 
         else:
             data = {"Message": "There was error authenticating"}
-            return JsonResponse(data, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(data)
