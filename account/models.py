@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.urls import reverse
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 # Create your models here.
 
 class MyUserManager(BaseUserManager):
@@ -52,7 +56,7 @@ class User(AbstractBaseUser):
     is_active       = models.BooleanField(default=True)
     is_staff        = models.BooleanField(default=False)
     is_superuser    = models.BooleanField(default=False)
-    
+
 
     is_student      = models.BooleanField(default=False)
     is_teacher      = models.BooleanField(default=False)
@@ -74,6 +78,7 @@ class User(AbstractBaseUser):
 
     def name(self):
         return self.first_name+' '+self.last_name
+
 
 
 

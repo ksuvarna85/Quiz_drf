@@ -13,10 +13,13 @@ from rest_framework import permissions,viewsets,generics
 from rest_framework.views import APIView,status
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
 
 # Create your views here.
 class StudentRegister(generics.GenericAPIView):
     serializer_class=StudentSerializer
+    permission_classes = (AllowAny,)
 
     def post(self,request,*args,**kwargs):
         serializer=StudentSerializer(data=request.data)
@@ -26,12 +29,16 @@ class StudentRegister(generics.GenericAPIView):
             #print(serializer['password'])
 
             user=serializer.newsave()
+            print(user)
+            token = Token.objects.create(user=user)
             data={
             "id":user.id,
             "Name": user.first_name + " " + user.last_name,
             "email":user.email,
             "username":user.username,
-            "Resgistration Status":"done"
+            "Resgistration Status":"done",
+            "Token":token.key,
+
 
             }
             return Response(data)
@@ -39,7 +46,7 @@ class StudentRegister(generics.GenericAPIView):
             return Response('not done')
 class TeacherRegister(generics.GenericAPIView):
     serializer_class=TeacherSerializer
-
+    permission_classes = (AllowAny,)
     def post(self,request,*args,**kwargs):
         serializer=TeacherSerializer(data=request.data)
         #print(serializer)
@@ -48,12 +55,15 @@ class TeacherRegister(generics.GenericAPIView):
             #print(serializer['password'])
 
             user=serializer.newsave()
+            token = Token.objects.create(user=user)
             data={
             "id":user.id,
             "Name": user.first_name + " " + user.last_name,
             "email":user.email,
             "username":user.username,
-            "Resgistration Status":"done"
+            "Resgistration Status":"done",
+            "Token":token.key,
+
 
             }
             return Response(data)
@@ -64,6 +74,7 @@ class TeacherRegister(generics.GenericAPIView):
 
 class Login(generics.GenericAPIView):
     serializer_class=LoginSerializer
+    permission_classes = (AllowAny,)
 
     def post(self,request,*args,**kwargs):
 
@@ -74,6 +85,7 @@ class Login(generics.GenericAPIView):
         user = authenticate(email=email,password=password)
         print(user)
         if user is not None:
+            token=Token.objects.get(user=user)
 
 
             login(request, user)
@@ -82,7 +94,9 @@ class Login(generics.GenericAPIView):
                 "Name": user.first_name + " " + user.last_name,
                 "id": user.pk,
                 "Username": user.username,
-                "Message":"done"
+                "Message":"done",
+                "Token":token.key
+
             }
 
 
