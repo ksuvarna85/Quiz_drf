@@ -29,22 +29,24 @@ class ExamTopicList(APIView):
             return Response(serializer.data)
 
     def post(self,request,pk):
-        serializer=CreateChpSerializer(data=request.data)
-        #print(serializer)
-        if serializer.is_valid(raise_exception=True):
-            user=serializer.save()
-            data={
-            "id":user.id,
-            "Exam topic":user.exam_topic
+        x=request.user.is_student
+        if x:
+            return Response("you r a student")
+        else:
+            serializer=CreateChpSerializer(data=request.data)
+            #print(serializer)
+            if serializer.is_valid(raise_exception=True):
+                user=serializer.save()
+                data={
+                "id":user.id,
+                "Exam topic":user.exam_topic
 
 
-            }
-            x=request.user.is_student
-            if x:
-                return Response("you r a student")
-            else:
+                }
 
-                return Response(data)
+
+
+            return Response(data)
 
 
 
@@ -75,48 +77,50 @@ class ExamDetails(APIView):
             return Response(serializer.data)
 
     def post(self,request,pk,q_pk):
+        x=request.user.is_student
+        if x:
+            return Response("you r a student")
+        else:
+            serializer=CreateQuestionSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
 
-        serializer=CreateQuestionSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+                user=serializer.save()
+                data={
+                "id":user.id,
+                "Question":user.question,
+                "option 1":user.option_1,
+                "option 2":user.option_2,
+                "option 3":user.option_3,
+                "option 4":user.option_4,
+                "correct_ans":user.correct_ans,
+                }
 
-            user=serializer.save()
-            data={
-            "id":user.id,
-            "Question":user.question,
-            "option 1":user.option_1,
-            "option 2":user.option_2,
-            "option 3":user.option_3,
-            "option 4":user.option_4,
-            "correct_ans":user.correct_ans,
-            }
-            x=request.user.is_student
-            if x:
-                return Response("you r a student")
-            else:
+
 
 
                 return Response(data)
 
     def put(self, request,pk,q_pk):
-        question = Question.objects.get(id=q_pk)
-        print(question)
-        serializer = CreateQuestionSerializer(question, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user=serializer.save()
-            data={
-            "id":user.id,
-            "Question":user.question,
-            "option 1":user.option_1,
-            "option 2":user.option_2,
-            "option 3":user.option_3,
-            "option 4":user.option_4,
-            "correct_ans":user.correct_ans,
-            }
+        x=request.user.is_student
+        if x:
+            return Response("you r a student")
+        else:
+            question = Question.objects.get(id=q_pk)
+            print(question)
+            serializer = CreateQuestionSerializer(question, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                user=serializer.save()
+                data={
+                "id":user.id,
+                "Question":user.question,
+                "option 1":user.option_1,
+                "option 2":user.option_2,
+                "option 3":user.option_3,
+                "option 4":user.option_4,
+                "correct_ans":user.correct_ans,
+                }
 
-            x=request.user.is_student
-            if x:
-                return Response("you r a student")
-            else:
+
                 return Response(data)
 
 
