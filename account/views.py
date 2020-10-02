@@ -85,7 +85,7 @@ class Login(generics.GenericAPIView):
         user = authenticate(email=email,password=password)
         print(user)
         if user is not None:
-            token=Token.objects.get(user=user)
+            token, _ =Token.objects.get_or_create(user=user)
 
 
             login(request, user)

@@ -17,7 +17,7 @@ from django.urls import include, path
 from rest_framework import routers
 from account import views
 from django.contrib import admin
-
+from quiz import views as views_quiz
 
 
 urlpatterns = [
@@ -25,5 +25,8 @@ urlpatterns = [
     path('teacher/',views.TeacherRegister.as_view()),
     path('',views.StudentRegister.as_view()),
     path("login/",views.Login.as_view()),
+    path('exam_topic/<int:pk>/',views_quiz.ExamTopicList.as_view()),
+    path('<int:pk>/<int:q_pk>/',views_quiz.ExamDetails.as_view()),
+
 
 ]
