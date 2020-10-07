@@ -64,6 +64,41 @@ class ExamTopicList(APIView):
 class ExamDetails(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self,request,pk):
+        question=McqExam.objects.get(id=pk)
+        question=Question.objects.filter(mcq_exam=question)
+        print(question)
+        serializer=CreateQuestionSerializer(question,many=True)
+        x=request.user.is_student
+        if x:
+            return Response("you r a student")
+        else:
+
+            return Response(serializer.data)
+
+    def post(self,request,pk):
+        x=request.user.is_student
+        if x:
+            return Response("you r a student")
+        else:
+            mcq_exam=McqExam.objects.get(pk=pk)
+            question=Question.objects.create(mcq_exam=mcq_exam,
+                                        question=request.data.get('question'),
+                                        option_1=request.data.get('option_1'),
+                                        option_2=request.data.get('option_2'),
+                                        option_3=request.data.get('option_3'),
+                                        option_4=request.data.get('option_4'),
+                                        correct_ans=request.data.get('correct_ans')  )
+            question.save()
+            serializer=CreateQuestionSerializer(question)
+            return Response(serializer.data)
+
+
+
+class QuestionDetails(APIView):
+    permission_classes = [IsAuthenticated]
+
+
     def get(self,request,pk,q_pk):
         question=McqExam.objects.get(id=pk)
         question=Question.objects.filter(mcq_exam=question)
@@ -76,58 +111,33 @@ class ExamDetails(APIView):
 
             return Response(serializer.data)
 
-    def post(self,request,pk,q_pk):
-        x=request.user.is_student
-        if x:
-            return Response("you r a student")
-        else:
-            serializer=CreateQuestionSerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-
-                user=serializer.save()
-                data={
-                "id":user.id,
-                "Question":user.question,
-                "option 1":user.option_1,
-                "option 2":user.option_2,
-                "option 3":user.option_3,
-                "option 4":user.option_4,
-                "correct_ans":user.correct_ans,
-                }
-
-
-
-
-                return Response(data)
-
     def put(self, request,pk,q_pk):
-        x=request.user.is_student
-        if x:
-            return Response("you r a student")
-        else:
-            question = Question.objects.get(id=q_pk)
-            print(question)
-            serializer = CreateQuestionSerializer(question, data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                user=serializer.save()
-                data={
-                "id":user.id,
-                "Question":user.question,
-                "option 1":user.option_1,
-                "option 2":user.option_2,
-                "option 3":user.option_3,
-                "option 4":user.option_4,
-                "correct_ans":user.correct_ans,
-                }
+        question = Question.objects.get(id=q_pk)
+        data={
+        'question':request.data['question'],
+        'option_1':request.data['option_1'],
+        'option_2':request.data['option_2'],
+        'option_3':request.data['option_3'],
+        'option_4':request.data['option_4'],
+        'correct_ans':request.data['correct_ans'],
+        'mcq_exam':pk
+
+        }
+        serializer = CreateQuestionSerializer(question, data=data)
+        if serializer.is_valid(raise_exception=True):
+            user=serializer.save()
+            data={
+            "id":user.id,
+            "Question":user.question,
+            "option 1":user.option_1,
+            "option 2":user.option_2,
+            "option 3":user.option_3,
+            "option 4":user.option_4,
+            "correct_ans":user.correct_ans,
+            }
 
 
-                return Response(data)
-
-
-
-
-
-
+            return Response(data)
 
     def delete(self, request,pk,q_pk):
         question = Question.objects.get(id=q_pk)
@@ -135,6 +145,7 @@ class ExamDetails(APIView):
         if x:
             return Response("you r a student")
         else:
+
 
             question.delete()
             return Response("Deleated successfully")

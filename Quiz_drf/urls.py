@@ -22,11 +22,13 @@ from quiz import views as views_quiz
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('teacher/',views.TeacherRegister.as_view()),
-    path('',views.StudentRegister.as_view()),
+    path('teacher_registration/',views.TeacherRegister.as_view()),
+    path('student_registration/',views.StudentRegister.as_view()),
     path("login/",views.Login.as_view()),
     path('exam_topic/<int:pk>/',views_quiz.ExamTopicList.as_view()),
-    path('<int:pk>/<int:q_pk>/',views_quiz.ExamDetails.as_view()),
+    path('exam_details/<int:pk>/',views_quiz.ExamDetails.as_view()),
+    path('question_details/<int:pk>/<int:q_pk>/',views_quiz.QuestionDetails.as_view()),
+
 
 
 ]

@@ -89,18 +89,33 @@ class Login(generics.GenericAPIView):
 
 
             login(request, user)
+            if user.is_teacher:
+                data = {
+                    "Name": user.first_name + " " + user.last_name,
+                    "id": user.pk,
+                    "Username": user.username,
+                    "Message":"done",
+                    "teacher":user.is_teacher,
+                    "Token":token.key
 
-            data = {
-                "Name": user.first_name + " " + user.last_name,
-                "id": user.pk,
-                "Username": user.username,
-                "Message":"done",
-                "Token":token.key
-
-            }
+                }
 
 
-            return Response(data)
+                return Response(data)
+            else:
+                data = {
+                    "Name": user.first_name + " " + user.last_name,
+                    "id": user.pk,
+                    "Username": user.username,
+                    "Message":"done",
+                    "student":user.is_student,
+                    "Token":token.key
+
+                }
+
+
+                return Response(data)
+
 
         else:
             data = {"Message": "There was error authenticating"}
