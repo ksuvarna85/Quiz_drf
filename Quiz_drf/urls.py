@@ -28,6 +28,8 @@ urlpatterns = [
     path('exam_topic/<int:pk>/',views_quiz.ExamTopicList.as_view()),
     path('exam_details/<int:pk>/',views_quiz.ExamDetails.as_view()),
     path('question_details/<int:pk>/<int:q_pk>/',views_quiz.QuestionDetails.as_view()),
+    path('student_response/<int:pk>/',views_quiz.StudentResponse.as_view()),
+
 
 
 

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
-
+import json
 # Create your views here.
 class ExamTopicList(APIView):
     permission_classes = [IsAuthenticated]
@@ -123,6 +123,7 @@ class QuestionDetails(APIView):
         'mcq_exam':pk
 
         }
+        print(request.data)
         serializer = CreateQuestionSerializer(question, data=data)
         if serializer.is_valid(raise_exception=True):
             user=serializer.save()
@@ -149,3 +150,51 @@ class QuestionDetails(APIView):
 
             question.delete()
             return Response("Deleated successfully")
+
+#STUDENT Quiz
+
+
+class StudentResponse(APIView):
+
+    def post(self,request,pk):
+        lst1=[]
+        j=[]
+        mcq_exam=McqExam.objects.get(pk=pk)
+        question=Question.objects.filter(mcq_exam=mcq_exam)
+
+        for i in question:
+            lst1.append(i.question)
+
+        lst2=[]
+
+        for i in request.data.values():
+            lst2.append(i)
+
+
+        if len(lst1)!=len(lst2):
+            while(len(lst1)!=len(lst2)):
+                lst2.append(0)
+
+        for i in range(0,len(lst1)):
+
+            mcq_exam=McqExam.objects.get(pk=pk)
+            if i==0:
+                question=Question.objects.filter(mcq_exam=mcq_exam)
+            req_question=question.first()
+
+
+            user=User.objects.get(email=request.user)
+            student=Student.objects.get(email=user)
+            if Student_Response.objects.filter(question=req_question,student=student).exists():
+                return Response("already answered")
+            else:
+                response=Student_Response.objects.create(question=req_question,student=student,student_response=lst2[i])
+
+                question=question.exclude(question=req_question)
+                print(question)
+
+                response.save()
+
+
+
+        return Response("Your Response has been registered")

@@ -11,3 +11,9 @@ class CreateQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Question
         fields=['mcq_exam','question','option_1','option_2','option_3','option_4','correct_ans','id']
+
+
+class StudentResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Student_Response
+        fields=['question','student','student_response']
