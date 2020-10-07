@@ -174,6 +174,7 @@ class StudentResponse(APIView):
         if len(lst1)!=len(lst2):
             while(len(lst1)!=len(lst2)):
                 lst2.append(0)
+        d=[]
 
         for i in range(0,len(lst1)):
 
@@ -190,11 +191,15 @@ class StudentResponse(APIView):
             else:
                 response=Student_Response.objects.create(question=req_question,student=student,student_response=lst2[i])
 
-                question=question.exclude(question=req_question)
+
                 print(question)
 
                 response.save()
+                serializer=StudentResponseSerializer(response)
+                d.append(serializer.data)
+            
+                question=question.exclude(question=req_question)
 
 
 
-        return Response("Your Response has been registered")
+        return Response(d)
