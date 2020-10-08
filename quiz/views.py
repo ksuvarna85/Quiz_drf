@@ -151,6 +151,14 @@ class QuestionDetails(APIView):
             question.delete()
             return Response("Deleated successfully")
 
+class TeacherResultsView(APIView):
+    def get(self,request,pk):
+        mcq_exam=McqExam.objects.get(pk=pk)
+        results=Results.objects.filter(mcq_exam=mcq_exam)
+        print(results)
+        serializer=ResultsSerializer(results,many=True)
+        return Response(serializer.data)
+
 #STUDENT Quiz
 
 
@@ -197,9 +205,52 @@ class StudentResponse(APIView):
                 response.save()
                 serializer=StudentResponseSerializer(response)
                 d.append(serializer.data)
-            
+
                 question=question.exclude(question=req_question)
 
 
 
         return Response(d)
+
+    def get(self,request,pk):
+        question_ans=McqExam.objects.get(pk=pk)
+        student_email=Student.objects.get(email=request.user)
+        #print(question_ans)
+        student_ans=Student_Response.objects.filter(student=student_email)
+        #print(student_ans)
+        #print(question_ans)
+        count=0
+        count_correct=0
+
+        questions=Question.objects.filter(mcq_exam=question_ans)
+        print(question_ans)
+
+        for i in questions:
+            question_ans=Question.objects.get(question=i).correct_ans
+            student_ans=Student_Response.objects.get(student=student_email,question=i).student_response
+            #print(student_ans+'     '+question_ans)
+            if int(student_ans)==int(question_ans):
+                count_correct=count_correct+1
+            count=count+1
+        chp_name=McqExam.objects.get(id=pk)
+        #print(x)
+        student_result=Results(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
+        if Results.objects.filter(mcq_exam=chp_name,student=student_email).exists():
+            user=Results.objects.get(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
+            data={
+            "Obtained":user.obtained_marks,
+            "Out-off":user.total_marks
+            }
+
+            return Response(data)
+
+        else:
+            student_result.save()
+            user=Results.objects.get(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
+            print(user)
+            data={
+            "Obtained":user.obtained_marks,
+            "Out-off":user.total_marks
+            }
+
+            return Response(data)

@@ -17,3 +17,8 @@ class StudentResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model=Student_Response
         fields=['question','student','student_response']
+
+class ResultsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Results
+        fields=['student','obtained_marks','total_marks']

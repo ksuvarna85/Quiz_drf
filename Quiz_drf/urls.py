@@ -29,6 +29,8 @@ urlpatterns = [
     path('exam_details/<int:pk>/',views_quiz.ExamDetails.as_view()),
     path('question_details/<int:pk>/<int:q_pk>/',views_quiz.QuestionDetails.as_view()),
     path('student_response/<int:pk>/',views_quiz.StudentResponse.as_view()),
+    path('result/<int:pk>/',views_quiz.TeacherResultsView.as_view()),
+
 
 
 
