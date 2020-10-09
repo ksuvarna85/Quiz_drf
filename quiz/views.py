@@ -157,7 +157,10 @@ class TeacherResultsView(APIView):
         results=Results.objects.filter(mcq_exam=mcq_exam)
         print(results)
         serializer=ResultsSerializer(results,many=True)
-        return Response(serializer.data)
+        if request.user.is_student:
+            return Response("you r a student")
+        else:
+            return Response(serializer.data)
 
 #STUDENT Quiz
 
@@ -176,7 +179,11 @@ class StudentResponse(APIView):
         lst2=[]
 
         for i in request.data.values():
+            if i=="":
+                lst2.append(0)
+                continue
             lst2.append(i)
+        print(lst2)
 
 
         if len(lst1)!=len(lst2):
@@ -254,3 +261,35 @@ class StudentResponse(APIView):
             }
 
             return Response(data)
+
+class StudentQuestionView(APIView):
+    def get(self,request,pk):
+        mcq_exam=McqExam.objects.get(pk=pk)
+        question=Question.objects.filter(mcq_exam=mcq_exam)
+        data=[]
+        for i in question:
+            d={
+            "id":i.id,
+            "Question":i.question,
+            "option_1":i.option_1,
+            "option_2":i.option_2,
+            "option_3":i.option_3,
+            "option_4":i.option_4,
+            }
+            data.append(d)
+
+        return Response(data)
+
+class ExamTopicStudent(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        exam=McqExam.objects.all()
+        serializer=CreateChpSerializer(exam,many=True)
+        x=request.user.is_teacher
+        print(x)
+        if x:
+            return Response("you r a teacher")
+        else:
+
+            return Response(serializer.data)

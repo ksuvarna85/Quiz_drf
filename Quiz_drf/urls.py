@@ -30,6 +30,9 @@ urlpatterns = [
     path('question_details/<int:pk>/<int:q_pk>/',views_quiz.QuestionDetails.as_view()),
     path('student_response/<int:pk>/',views_quiz.StudentResponse.as_view()),
     path('result/<int:pk>/',views_quiz.TeacherResultsView.as_view()),
+    path('student_question/<int:pk>/',views_quiz.StudentQuestionView.as_view()),
+    path('exam_topic/',views_quiz.ExamTopicStudent.as_view()),
+
 
 
 
