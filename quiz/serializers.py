@@ -5,7 +5,7 @@ from account.models import *
 class CreateChpSerializer(serializers.ModelSerializer):
     class Meta:
         model = McqExam
-        fields =['exam_topic','id']
+        fields =['id','exam_topic']
 
 class CreateQuestionSerializer(serializers.ModelSerializer):
     class Meta:

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
-import json
+from quiz.permissions import *
 # Create your views here.
 class ExamTopicList(APIView):
     permission_classes = [IsAuthenticated]
@@ -152,6 +152,7 @@ class QuestionDetails(APIView):
             return Response("Deleated successfully")
 
 class TeacherResultsView(APIView):
+
     def get(self,request,pk):
         mcq_exam=McqExam.objects.get(pk=pk)
         results=Results.objects.filter(mcq_exam=mcq_exam)
@@ -166,10 +167,9 @@ class TeacherResultsView(APIView):
 
 
 class StudentResponse(APIView):
-
+    permission_classes = [IsAuthenticated,Students]
     def post(self,request,pk):
         lst1=[]
-        j=[]
         mcq_exam=McqExam.objects.get(pk=pk)
         question=Question.objects.filter(mcq_exam=mcq_exam)
 
@@ -263,6 +263,7 @@ class StudentResponse(APIView):
             return Response(data)
 
 class StudentQuestionView(APIView):
+    permission_classes = [IsAuthenticated,Students]
     def get(self,request,pk):
         mcq_exam=McqExam.objects.get(pk=pk)
         question=Question.objects.filter(mcq_exam=mcq_exam)
@@ -281,7 +282,8 @@ class StudentQuestionView(APIView):
         return Response(data)
 
 class ExamTopicStudent(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,Students]
+
 
     def get(self,request):
         exam=McqExam.objects.all()
