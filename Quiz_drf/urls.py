@@ -18,6 +18,11 @@ from rest_framework import routers
 from account import views
 from django.contrib import admin
 from quiz import views as views_quiz
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'student_examtopic',views_quiz.ExamTopicStudent, )
+
 
 
 urlpatterns = [
@@ -31,7 +36,8 @@ urlpatterns = [
     path('student_response/<int:pk>/',views_quiz.StudentResponse.as_view()),
     path('result/<int:pk>/',views_quiz.TeacherResultsView.as_view()),
     path('student_question/<int:pk>/',views_quiz.StudentQuestionView.as_view()),
-    path('exam_topic/',views_quiz.ExamTopicStudent.as_view()),
+    path('',include(router.urls)),
+
 
 
 

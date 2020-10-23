@@ -22,3 +22,8 @@ class ResultsSerializer(serializers.ModelSerializer):
     class Meta:
         model=Results
         fields=['student','obtained_marks','total_marks']
+
+class ResultsSerializerStudent(serializers.ModelSerializer):
+    class Meta:
+        model=Results
+        fields=['mcq_exam','student','obtained_marks','total_marks']

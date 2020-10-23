@@ -6,19 +6,26 @@ from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
 from quiz.permissions import *
+from rest_framework import viewsets
 # Create your views here.
 class ExamTopicList(APIView):
     permission_classes = [IsAuthenticated]
 
-
-    def get_object(self, pk):
+    def get_object(self):
+        user=User.objects.get(id=self.request.user.id).email
+        teacher=Teacher.objects.get(email=user)
+        return teacher
+    def get_queryset(self):
         try:
-            return McqExam.objects.get(pk=pk)
+
+            teacher=self.get_object()
+
+            return McqExam.objects.filter(teacher=teacher)
         except McqExam.DoesNotExist:
             raise Http404
 
     def get(self,request,pk):
-        exam=McqExam.objects.all()
+        exam=self.get_queryset()
         serializer=CreateChpSerializer(exam,many=True)
         x=request.user.is_student
         print(x)
@@ -33,25 +40,29 @@ class ExamTopicList(APIView):
         if x:
             return Response("you r a student")
         else:
-            serializer=CreateChpSerializer(data=request.data)
-            #print(serializer)
-            if serializer.is_valid(raise_exception=True):
-                user=serializer.save()
+            exam_topic=request.data.get("exam_topic")
+            if exam_topic is None:
                 data={
-                "id":user.id,
-                "Exam topic":user.exam_topic
-
-
+                "Message":"incorrect key please enter the key as exam_topic"
                 }
+                return Response(data)
 
+            teacher=self.get_object()
 
+            mcq_exam=McqExam.objects.create(exam_topic=exam_topic,teacher=teacher)
+            mcq_exam.save()
+            serializer=CreateChpSerializer(mcq_exam)
+            return Response(serializer.data)
 
-            return Response(data)
 
 
 
     def delete(self,request,pk):
-        exam=self.get_object(pk=pk)
+        try:
+            exam=exam=McqExam.objects.get(pk=pk)
+        except McqExam.DoesNotExist:
+            raise Http404
+
         x=request.user.is_student
         if x:
             return Response("you r a student")
@@ -152,10 +163,19 @@ class QuestionDetails(APIView):
             return Response("Deleated successfully")
 
 class TeacherResultsView(APIView):
+    def get_queryset(self,pk):
+        try:
+            mcq_exam=McqExam.objects.get(pk=pk)
+            results=Results.objects.filter(mcq_exam=mcq_exam)
+            return results
+        except:
+            return -1
 
     def get(self,request,pk):
-        mcq_exam=McqExam.objects.get(pk=pk)
-        results=Results.objects.filter(mcq_exam=mcq_exam)
+
+        results=self.get_queryset(pk)
+        if results==-1:
+            return Response("Details Not Found")
         print(results)
         serializer=ResultsSerializer(results,many=True)
         if request.user.is_student:
@@ -168,6 +188,13 @@ class TeacherResultsView(APIView):
 
 class StudentResponse(APIView):
     permission_classes = [IsAuthenticated,Students]
+
+    def get_serializer_class(self):
+        if self.request.method=='POST':
+            return StudentResponseSerializer
+        else:
+
+            return ResultsSerializerStudent
     def post(self,request,pk):
         lst1=[]
         mcq_exam=McqExam.objects.get(pk=pk)
@@ -210,7 +237,8 @@ class StudentResponse(APIView):
                 print(question)
 
                 response.save()
-                serializer=StudentResponseSerializer(response)
+                serializer=self.get_serializer_class()
+                serializer=serializer(response)
                 d.append(serializer.data)
 
                 question=question.exclude(question=req_question)
@@ -244,29 +272,35 @@ class StudentResponse(APIView):
         student_result=Results(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
         if Results.objects.filter(mcq_exam=chp_name,student=student_email).exists():
             user=Results.objects.get(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
-            data={
-            "Obtained":user.obtained_marks,
-            "Out-off":user.total_marks
-            }
+            serializer=self.get_serializer_class()
+            serializer=serializer(user)
 
-            return Response(data)
+
+            return Response(serializer.data)
 
         else:
             student_result.save()
             user=Results.objects.get(mcq_exam=chp_name,student=student_email,obtained_marks=count_correct,total_marks=count)
-            print(user)
-            data={
-            "Obtained":user.obtained_marks,
-            "Out-off":user.total_marks
-            }
+            serializer=ResultsSerializerStudent(user)
 
-            return Response(data)
-
+            return Response(serializer.data)
 class StudentQuestionView(APIView):
     permission_classes = [IsAuthenticated,Students]
+
+    def get_queryset(self,pk):
+        try:
+            mcq_exam=McqExam.objects.get(pk=pk)
+            question=Question.objects.filter(mcq_exam=mcq_exam)
+            return question
+        except:
+            return -1
+
+
     def get(self,request,pk):
-        mcq_exam=McqExam.objects.get(pk=pk)
-        question=Question.objects.filter(mcq_exam=mcq_exam)
+
+        question=self.get_queryset(pk)
+        if question==-1:
+            return Response("Exam Topic Not Found")
         data=[]
         for i in question:
             d={
@@ -281,17 +315,8 @@ class StudentQuestionView(APIView):
 
         return Response(data)
 
-class ExamTopicStudent(APIView):
-    permission_classes = [IsAuthenticated,Students]
+class ExamTopicStudent(viewsets.ModelViewSet):
 
-
-    def get(self,request):
-        exam=McqExam.objects.all()
-        serializer=CreateChpSerializer(exam,many=True)
-        x=request.user.is_teacher
-        print(x)
-        if x:
-            return Response("you r a teacher")
-        else:
-
-            return Response(serializer.data)
+    serializer_class=CreateChpSerializer
+    queryset=McqExam.objects.all()
+    permission_classes = (IsAuthenticated,Students)

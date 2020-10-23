@@ -100,13 +100,16 @@ class Student(User):
 
 
 class McqExam(models.Model):
-	exam_topic=models.CharField(max_length=20)
-	#teacher=models.ForeignKey(Teacher,on_delete=models.CASCADE)
-	def __str__(self):
-		return self.exam_topic
 
-	def get_absolute_url(self):
-		return reverse("account:list")
+    teacher=models.ForeignKey(Teacher,on_delete=models.CASCADE)
+    exam_topic=models.CharField(max_length=20)
+
+    def __str__(self):
+
+        return self.exam_topic
+
+    def get_absolute_url(self):
+        return reverse("account:list")
 
 class Question(models.Model):
 	mcq_exam=models.ForeignKey(McqExam,on_delete=models.CASCADE,related_name='mcq_exam')
