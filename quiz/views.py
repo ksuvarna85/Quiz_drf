@@ -26,14 +26,46 @@ class ExamTopicList(APIView):
 
     def get(self,request,pk):
         exam=self.get_queryset()
-        serializer=CreateChpSerializer(exam,many=True)
+        print(exam)
+        teacher=self.get_object()
+
+
+        data=[]
+
+        for i in exam:
+            lst2=[]
+            question=Question.objects.filter(mcq_exam=i)
+
+            for j in question:
+
+                data3={
+                "id":j.id,
+                "question":j.question,
+                "option_1":j.option_1,
+                "option_2":j.option_2,
+                "option_3":j.option_3,
+                "option_4":j.option_4,
+                "correct_ans":j.correct_ans,
+
+                }
+                lst2.append(data3)
+
+            data2={
+            "id":i.id,
+            "teacher":teacher.first_name +" "+ teacher.last_name,
+            "exam_topic":i.exam_topic,
+            "question":lst2,
+            }
+            data.append(data2)
+
+
         x=request.user.is_student
         print(x)
         if x:
             return Response("you r a student")
         else:
 
-            return Response(serializer.data)
+            return Response(data)
 
     def post(self,request,pk):
         x=request.user.is_student
