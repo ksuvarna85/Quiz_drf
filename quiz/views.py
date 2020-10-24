@@ -73,12 +73,12 @@ class ExamTopicList(APIView):
 
 
 class ExamDetails(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,TestDetails]
 
     def get(self,request,pk):
         question=McqExam.objects.get(id=pk)
         question=Question.objects.filter(mcq_exam=question)
-        print(question)
+        #print(question)
         serializer=CreateQuestionSerializer(question,many=True)
         x=request.user.is_student
         if x:
@@ -107,7 +107,7 @@ class ExamDetails(APIView):
 
 
 class QuestionDetails(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,TestDetails]
 
 
     def get(self,request,pk,q_pk):
@@ -124,16 +124,20 @@ class QuestionDetails(APIView):
 
     def put(self, request,pk,q_pk):
         question = Question.objects.get(id=q_pk)
-        data={
-        'question':request.data['question'],
-        'option_1':request.data['option_1'],
-        'option_2':request.data['option_2'],
-        'option_3':request.data['option_3'],
-        'option_4':request.data['option_4'],
-        'correct_ans':request.data['correct_ans'],
-        'mcq_exam':pk
+        try:
+            data={
+            'question':request.data['question'],
+            'option_1':request.data['option_1'],
+            'option_2':request.data['option_2'],
+            'option_3':request.data['option_3'],
+            'option_4':request.data['option_4'],
+            'correct_ans':request.data['correct_ans'],
+            'mcq_exam':pk
 
-        }
+            }
+        except:
+            return Response("Required fields not availabel")
+
         print(request.data)
         serializer = CreateQuestionSerializer(question, data=data)
         if serializer.is_valid(raise_exception=True):
@@ -316,7 +320,15 @@ class StudentQuestionView(APIView):
         return Response(data)
 
 class ExamTopicStudent(viewsets.ModelViewSet):
+    def get_queryset(self):
+        if self.request.user.is_student:
+            return McqExam.objects.all()
+        else:
+            user=User.objects.get(id=self.request.user.id).email
+            teacher=Teacher.objects.get(email=user)
+            return McqExam.objects.filter(teacher=teacher)
+
 
     serializer_class=CreateChpSerializer
-    queryset=McqExam.objects.all()
-    permission_classes = (IsAuthenticated,Students)
+
+    permission_classes = (IsAuthenticated,)

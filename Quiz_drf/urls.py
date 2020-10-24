@@ -21,7 +21,7 @@ from quiz import views as views_quiz
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'student_examtopic',views_quiz.ExamTopicStudent, )
+router.register(r'student_examtopic',views_quiz.ExamTopicStudent, basename='student_examtopic')
 
 
 
