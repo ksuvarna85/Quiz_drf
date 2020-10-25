@@ -14,6 +14,8 @@ class TestDetails(permissions.BasePermission):
     message = 'You are not allowed to access'
 
     def has_permission(self, request, view):
+        if request.method=='GET':
+            return True
         test_email=McqExam.objects.get(pk=view.kwargs['pk']).teacher
         print(test_email)
         email=request.user.email
